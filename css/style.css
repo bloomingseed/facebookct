@@ -1,0 +1,8 @@
+.m-auto{margin:auto;}
+.btn{border:none;padding:4px 8px;cursor:pointer;}
+.c-primary{color:white;background-color:blue;}
+.c-secondary{color:black;background-color:#ddd;}
+.text-center{text-align:center;}
+.text-italic{font-style: italic;}
+.d-flex{display: flex;} 
+.justify-content-center{justify-content: center;}
