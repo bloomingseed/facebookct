@@ -1,10 +1,10 @@
 {
     "manifest_version": 3,
-    "name": "Facebook Post Commentor Tool",
+    "name": "Facebook Commentor Tool",
     "description": "A tool to auto post comment to facebook posts and update the spreadsheet status. This extension works together with the designed Google app script.",
     "version": "1.0.0",
     "background":{
-        "service_worker": "background.js"
+        "service_worker": "background-wrapper.js"
     },
     "icons":{
         "16": "/images/logo_16.png",
@@ -27,10 +27,10 @@
         "https://www.facebook.com/*"
     ],
     "oauth2": {
-        "client_id": "99161837988-smooula9ggb1568q2jona5oernsua5ng.apps.googleusercontent.com",
+        "client_id": "261045199742-cf109oo62ls6t1gfuld03mljn8pj1onp.apps.googleusercontent.com",
         "scopes": [
             "https://www.googleapis.com/auth/spreadsheets"
         ]
     },
-    "key":"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsq7h4eHYLO0CBvjurZX288EoOlX/VGvm2usF/qTY1feUjdt1sGv7+BMLwGCx7Mlny66G7Me3gpa5pvAO/kVJooSVP4ov5hfpYKrZKPrVIiVtc370CQgTwiB4IQlmiKfLLiiYecNgagEIhcKndmM4Y5D4AGl2UJFpQsu/8vNEN92s7CZzWFSg4U6+AhLptMnuBCsyMrofhvBOnJHZPUOmF4gO3Sg60QAWW6cqlv7hmN9zHAhfXhImgi/pE34eZdTWLyOC0xZv0VmQbkjOStDxqSZVEWGhMzuz2LXCm7TgwsAYdClHrkPFNT4ayD51NH1jkbJZ5x2/Ln+TVokTXZposwIDAQAB"
+    "key":"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArKVHElCcAUrMAnwZg3X9jLzbeoa0CwNDMjlAQW5fvpJ30S39pOQfw2n1YpoTJ2HkJdltj0hH86iHEMWMwrSEEMBgzNDbXyQeFCKq/ofQ9/9rqMRQFPgZSd1PfTs8Mn3biHekgK2QM305xkBnYNV119Bypftt17vXfKXuKxihMKj8GGvUDBmznbVhsUfveAxieTpzUrAOFfjK4HvBBL5AH/9LpckngNy/+5yDnVfvF1Wt7Up1wX4MnIaY59cyiWOqK8AHX1rKSrOaTd04ORSRZLrq+OaT8VKeCVHO2fKO4iGwhZwbcCkJhrps9KF+FVX/TNd/y3ox+K/N8RkTtbnAZQIDAQAB"
 }
