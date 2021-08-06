@@ -14,6 +14,6 @@
 - The "comments" column can be randomized from a comment box which is on the far right of the spreadsheet, using excel formula. If you need more comments, add rows under the "comment box" then change range in the formula.
 
 # Current drawbacks
-- Chrome may open many tabs at once if the connection is slow.
+- User **must** focus on other window before the tool make comment. Otherwise it won't work.
 - Spreadsheet column orders must not be changed.
 - Google puts many constraints: daily token limit of 10000, test users of 100. Publishing app requires verification.
