@@ -1,30 +1,5 @@
-// Supportive methods to defines document ready state
-function first2DegNode(elm){
-    // console.log(elm, elm.children, elm.children?elm.children.length:null);  // debug
-    if(elm.children.length==2)
-        return elm;
-    return first2DegNode(elm.parentElement)
-}
-function findSvgContainer(root){
-    if(root.firstChild.tagName=='svg')
-        return root;
-    return findSvgContainer(root.firstChild)
-}
-function getCommentFormElement(){
-    return document.querySelector('form:last-child');
-}
-function isDocumentReady(){
-    let formElm = getCommentFormElement();
-    if(!formElm){   // checks if not foudn formElm
-        return false;
-    }
-    let container = findSvgContainer(first2DegNode(formElm.parentElement));
-    return container.children.length==2;    // returns if the container has 2 children
-}
 // Supportive methods for making the comment
 function stimulateKeyboardInput(target, options){
-    // 	let options = isSpaceKey?{code:"Space",key:" ",keyCode:32,bubbles:true, cancelBubble:false}
-    //                             :{code:"Enter",key:"Enter",keyCode:13,bubbles:true, cancelBubble:false};
     let payload = {
         bubbles:true,
         cancelBubble:false,
@@ -39,7 +14,6 @@ function stimulateKeyboardInput(target, options){
     target.focus(); // backup for failing focus event
     target.click(); // backup for failing focus event
     let events = [new FocusEvent('focus'), new KeyboardEvent('keydown',options), new KeyboardEvent('keypress',options), new InputEvent('input',optionsInput), new KeyboardEvent('keyup',options)];
-    // let events = [new FocusEvent('focus'), new KeyboardEvent('keydown',options), new KeyboardEvent('keypress',options), new KeyboardEvent('keyup',options)];
     events.forEach(e=>target.dispatchEvent(e));  
     console.log('done');//debugging
 }
@@ -50,18 +24,6 @@ function getKeyOptions(isSpace=true){
     return isSpace?{key:' ',keyCode:32,code:'Space'}
                     :{key:'Enter',keyCode:13,code:'Enter'};
 }
-// function solve(root, cb){
-// 	let queue = [];
-//     queue.push(root);
-//     while(queue.length>0){
-//         let node = queue.shift();	// pop head
-//         cb(node);
-//         let children = node.children;
-//         for(let i = 0; i<children.length; ++i){
-//             queue.push(children[i]);
-//         }
-//     }
-// }
 function getDocumentHeight(){
     var body = document.body, html = document.documentElement;
     var height = Math.max( body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight );
@@ -92,18 +54,11 @@ function makeComment(comment, callback){
     console.log(TAG,'Started');
     let t = setInterval(function(){
         console.log(TAG,'checking webpage loaded..');
-        // if(!isDocumentReady()){ // checks if document not ready to make comment
-        //     return;
-        // }
         let cmtDiv = getCmtDiv();
         if(!cmtDiv) // checks if youtube has not finished loading
             return; 
         clearInterval(t);   // stops checking if webpage is loaded
-        // let height = getDocumentHeight();   // gets current full document height
-        // scrollBy(0,height);  // scrolls to bottom of page
-        
         console.log(TAG,'making comment..');
-        // let cmtDiv = getCmtDiv();
         let t4 = setInterval(()=>{  // keeps try to make comment
             cmtDiv = getCmtDiv();
             stimulateKeyboardInput(cmtDiv,{key:' ',keyCode:32,code:'Space'});
@@ -134,29 +89,6 @@ function makeComment(comment, callback){
                 callback(cmtUrl);  // calls the callback method with the comment url
             },interval);
         }, interval);
-        // stimulateKeyboardInput(cmtDiv,{key:' ',keyCode:32,code:'Space'});
-        // let span = getSpanIn(cmtDiv);
-        // span.innerHTML = comment;
-        // stimulateKeyboardInput(cmtDiv,{key:' ',keyCode:32,code:'Space'});
-
-        // let cmtElmsCount = getCommentElements().length; // counts the comment elements
-        // stimulateKeyboardInput(getCmtDiv(),getKeyOptions(false));   // makes comment
-        // var t3 = setInterval(function(){    // keeps trying this function
-        //     let currElms = getCommentElements();    // gets list of comment elements
-        //     console.log(cmtElmsCount,'->',currElms.length);   // debugging
-        //     if(currElms.length== cmtElmsCount)   // checks if no new comment has been made
-        //         return;
-        //     var cmtElm = currElms[currElms.length-1]; // gets the last comment element
-        //     console.log('cmtElm:',cmtElm);  // debugging
-        //     let cmtUrl = cmtElm.querySelector('ul:last-child li:last-child a');  // gets the comment url element
-        //     if(!cmtUrl){    // checks if cmtUrl has not been found
-        //         return;
-        //     }
-        //     cmtUrl = cmtUrl.href;   // gets the url of this anchor tag
-        //     clearInterval(t3);  // stops trying
-        //     console.log('cmtUrl:',cmtUrl);   // debugging
-        //     callback(cmtUrl);  // calls the callback method with the comment url
-        // },interval);
     },interval);
 }
 function sendMessageExtension(message,callback){
@@ -167,18 +99,27 @@ function sendMessageExtension(message,callback){
         callback();
     }
 }
+function openStubWindow(){
+    let stubWindow = window.open('about:blank','_blank',"width:500,height:300");
+    stubWindow.document.body.style.backgroundColor="#1167b1";
+    let h2 = stubWindow.document.createElement('h2');
+    stubWindow.document.body.appendChild(h2);
+    h2.innerText = "[Facebook CT] stub tab will be closed automatically..";
+    h2.style.color = '#fff';
+    return stubWindow;
+}
 /**
  * Main procedure after received arguments
  */
 function main(args){
     const TAG = 'main';
     let type = args.type;
+    let stubWindow = openStubWindow();  // opens stub window to redirect the focus
     if(type=='comment'){   // checks if the args is for making comment
         let {comment, row} = args.params;   // extracts comment and row value from arguments
         makeComment(comment, function(val){
             let msgPayload = JSON.stringify({row,val,type}); // creates correct format object to send to the extension
-            // sendMessageExtension(msgPayload, window.close); // sends message then close
-            sendMessageExtension(msgPayload); // sends message to extension
+            sendMessageExtension(msgPayload, stubWindow.close); // sends message to extension
         });
     } else{ // checks if the args is for deleting comment
         // TODO

@@ -2,8 +2,10 @@
 function isFacebookUrlMatchFormat(url,output){
     if(typeof(url)!='string') 
         return false;
+    let TAG = "isFacebookUrlMatchFormat";
     let pattern = /https:\/\/(www.)?facebook.com\/groups\/.+\/posts\/\d+\/(.+)$/;    // validates post and comment url with any parameters
     let matches = url.match(pattern);
+    // console.log(TAG,url,"Regex matches: ",matches);
     if(!matches || matches.length!=3) 
         return false;     // ensures url is a facebook post and has query string
     let urlParams = matches[2];
@@ -18,7 +20,7 @@ function isFacebookUrlMatchFormat(url,output){
     }
     output['params'] = o;
     output['type'] = o['comment_id'] && o['facebookct']?'delete'
-                    :o['comment'] && o['row'] && o['timeout']?'comment'
+                    :o['comment'] && o['row']?'comment'
                     :null;
     return true;
 }
@@ -119,7 +121,7 @@ function xhrWithAuth(payload) {
     var retry = true;
     // const API_KEY = 'AIzaSyBoOa9ile3fk8_dEo4DRMEzD2g4uRdvLI8';
     // const SCRIPT_ID = 'AKfycbxdp2tFOBq2XcKm_oZdj-oUbnn_SozhRwJeDE6mkgmjFtjevJ49iqoEVFVsmGhS7Pi4';
-    const DEPLOYMENT_ID = 'AKfycbxRRKwwRKNL4NWdm4XzO3hpVJ7OdCkJi-cNqBKxdfxzyvSKm-eHACPJF7YpJd3KzV5J';
+    const DEPLOYMENT_ID = 'AKfycbxQvvXJe8LMoSUSW6lsHCeRN4SEA5ENBNjW8-lpimZDTYlZ-8VdE_EDvNHr_h4Hds2vsA';
     const POST_URL = `https://script.googleapis.com/v1/scripts/${DEPLOYMENT_ID}:run`;
     
     
