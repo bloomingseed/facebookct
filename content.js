@@ -99,34 +99,64 @@ function makeComment(comment, callback){
         if(!cmtDiv) // checks if youtube has not finished loading
             return; 
         clearInterval(t);   // stops checking if webpage is loaded
-        let height = getDocumentHeight();   // gets current full document height
-        scrollBy(0,height);  // scrolls to bottom of page
+        // let height = getDocumentHeight();   // gets current full document height
+        // scrollBy(0,height);  // scrolls to bottom of page
         
         console.log(TAG,'making comment..');
         // let cmtDiv = getCmtDiv();
-        stimulateKeyboardInput(cmtDiv,{key:' ',keyCode:32,code:'Space'});
-        let span = getSpanIn(cmtDiv);
-        span.innerHTML = comment;
-        stimulateKeyboardInput(cmtDiv,{key:' ',keyCode:32,code:'Space'});
-
-        let cmtElmsCount = getCommentElements().length; // counts the comment elements
-        stimulateKeyboardInput(getCmtDiv(),getKeyOptions(false));   // makes comment
-        var t3 = setInterval(function(){    // keeps trying this function
-            let currElms = getCommentElements();    // gets list of comment elements
-            console.log(cmtElmsCount,'->',currElms.length);   // debugging
-            if(currElms.length== cmtElmsCount)   // checks if no new comment has been made
-                return;
-            var cmtElm = currElms[currElms.length-1]; // gets the last comment element
-            console.log('cmtElm:',cmtElm);  // debugging
-            let cmtUrl = cmtElm.querySelector('ul:last-child li:last-child a');  // gets the comment url element
-            if(!cmtUrl){    // checks if cmtUrl has not been found
+        let t4 = setInterval(()=>{  // keeps try to make comment
+            cmtDiv = getCmtDiv();
+            stimulateKeyboardInput(cmtDiv,{key:' ',keyCode:32,code:'Space'});
+            let span = getSpanIn(cmtDiv);
+            if(!span){   // checks if not found span element
                 return;
             }
-            cmtUrl = cmtUrl.href;   // gets the url of this anchor tag
-            clearInterval(t3);  // stops trying
-            console.log('cmtUrl:',cmtUrl);   // debugging
-            callback(cmtUrl);  // calls the callback method with the comment url
-        },interval);
+            clearInterval(t4);
+            span.innerHTML = comment;
+            stimulateKeyboardInput(cmtDiv,{key:' ',keyCode:32,code:'Space'});
+    
+            let cmtElmsCount = getCommentElements().length; // counts the comment elements
+            stimulateKeyboardInput(getCmtDiv(),getKeyOptions(false));   // makes comment
+            var t3 = setInterval(function(){    // keeps trying this function
+                let currElms = getCommentElements();    // gets list of comment elements
+                console.log(cmtElmsCount,'->',currElms.length);   // debugging
+                if(currElms.length== cmtElmsCount)   // checks if no new comment has been made
+                    return;
+                var cmtElm = currElms[currElms.length-1]; // gets the last comment element
+                console.log('cmtElm:',cmtElm);  // debugging
+                let cmtUrl = cmtElm.querySelector('ul:last-child li:last-child a');  // gets the comment url element
+                if(!cmtUrl){    // checks if cmtUrl has not been found
+                    return;
+                }
+                cmtUrl = cmtUrl.href;   // gets the url of this anchor tag
+                clearInterval(t3);  // stops trying
+                console.log('cmtUrl:',cmtUrl);   // debugging
+                callback(cmtUrl);  // calls the callback method with the comment url
+            },interval);
+        }, interval);
+        // stimulateKeyboardInput(cmtDiv,{key:' ',keyCode:32,code:'Space'});
+        // let span = getSpanIn(cmtDiv);
+        // span.innerHTML = comment;
+        // stimulateKeyboardInput(cmtDiv,{key:' ',keyCode:32,code:'Space'});
+
+        // let cmtElmsCount = getCommentElements().length; // counts the comment elements
+        // stimulateKeyboardInput(getCmtDiv(),getKeyOptions(false));   // makes comment
+        // var t3 = setInterval(function(){    // keeps trying this function
+        //     let currElms = getCommentElements();    // gets list of comment elements
+        //     console.log(cmtElmsCount,'->',currElms.length);   // debugging
+        //     if(currElms.length== cmtElmsCount)   // checks if no new comment has been made
+        //         return;
+        //     var cmtElm = currElms[currElms.length-1]; // gets the last comment element
+        //     console.log('cmtElm:',cmtElm);  // debugging
+        //     let cmtUrl = cmtElm.querySelector('ul:last-child li:last-child a');  // gets the comment url element
+        //     if(!cmtUrl){    // checks if cmtUrl has not been found
+        //         return;
+        //     }
+        //     cmtUrl = cmtUrl.href;   // gets the url of this anchor tag
+        //     clearInterval(t3);  // stops trying
+        //     console.log('cmtUrl:',cmtUrl);   // debugging
+        //     callback(cmtUrl);  // calls the callback method with the comment url
+        // },interval);
     },interval);
 }
 function sendMessageExtension(message,callback){
@@ -142,10 +172,11 @@ function sendMessageExtension(message,callback){
  */
 function main(args){
     const TAG = 'main';
-    if(args.type=='comment'){   // checks if the args is for making comment
+    let type = args.type;
+    if(type=='comment'){   // checks if the args is for making comment
         let {comment, row} = args.params;   // extracts comment and row value from arguments
         makeComment(comment, function(val){
-            let msgPayload = JSON.stringify({row,val}); // creates correct format object to send to the extension
+            let msgPayload = JSON.stringify({row,val,type}); // creates correct format object to send to the extension
             // sendMessageExtension(msgPayload, window.close); // sends message then close
             sendMessageExtension(msgPayload); // sends message to extension
         });

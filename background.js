@@ -9,15 +9,16 @@ function isFacebookUrlMatchFormat(url,output){
     let urlParams = matches[2];
     let q = new URLSearchParams(urlParams);
     let paramKeys = [   // possible params
-                        'comment','row',    // params to make comment
+                        'comment','row', 'timeout',    // params to make comment
                         'comment_id','facebookct'];      // param to delete comment 
     let o = {}
     for(let key of paramKeys){
-        if(q.get(key)!=null) o[key] = q.get(key);
+        if(q.get(key)!=null) 
+            o[key] = q.get(key);
     }
     output['params'] = o;
     output['type'] = o['comment_id'] && o['facebookct']?'delete'
-                    :o['comment'] && o['row']?'comment'
+                    :o['comment'] && o['row'] && o['timeout']?'comment'
                     :null;
     return true;
 }
@@ -66,7 +67,7 @@ function onTabUpdatedListener(tabId,changeInfo,tab){
  * Ensures the request contains required keys to generate the payload as in `generatePayload` function
  */
 function isMessageMatchFormat(request){
-    let arr = ['row','val'];    // defines required keys
+    let arr = ['row','val','type'];    // defines required keys
     for(let key of arr){
         if(request[key]==undefined)     // checks if the request doesn't contain this required key
             return false;
@@ -74,13 +75,26 @@ function isMessageMatchFormat(request){
     return true;
 }
 /**
- * Encapsulating `args` for calling GAS API
+ * Encapsulating `args` for calling GAS API.
+ * Different types of request resulting in different payload!
  */
-function generatePayload(args){
-    const FUNC_NAME = 'setStatusValue'; // defines GAS method name to call
+function generatePayload(args,type){
+    let funcName, params;
+    if(type=='comment' && args.timeout){
+        funcName = 'scheduleDeleteComment';
+        params = [args.val, args.timeout, args.row];
+    } else {
+        funcName = 'setStatusValue';
+        params = [args.row, args.val];
+    }
+    // const FUNC_NAME = 'setStatusValue'; // defines GAS method name to call
+    // return JSON.stringify({
+    //     "function": FUNC_NAME,
+    //     "parameters": [args.row, args.val]  // defines the arguments for the GAS method
+    // });
     return JSON.stringify({
-        "function": FUNC_NAME,
-        "parameters": [args.row, args.val]  // defines the arguments for the GAS method
+        'function':funcName,
+        'parameters':params
     });
 }
 function getTokenStorage(callback){
@@ -105,7 +119,7 @@ function xhrWithAuth(payload) {
     var retry = true;
     // const API_KEY = 'AIzaSyBoOa9ile3fk8_dEo4DRMEzD2g4uRdvLI8';
     // const SCRIPT_ID = 'AKfycbxdp2tFOBq2XcKm_oZdj-oUbnn_SozhRwJeDE6mkgmjFtjevJ49iqoEVFVsmGhS7Pi4';
-    const DEPLOYMENT_ID = 'AKfycbzNq68LMVY9QLu2PDsTPKsZKDVxs3c74ydTyPZFuhu5gwdy1iN-tptJYuVwQpeIj7gtNg';
+    const DEPLOYMENT_ID = 'AKfycbxRRKwwRKNL4NWdm4XzO3hpVJ7OdCkJi-cNqBKxdfxzyvSKm-eHACPJF7YpJd3KzV5J';
     const POST_URL = `https://script.googleapis.com/v1/scripts/${DEPLOYMENT_ID}:run`;
     
     
@@ -154,19 +168,27 @@ function onTabMessageListener(request, sender, sendResponse){
     let TAG = "onTabMessageListener";
     let tabId = sender.tab.id;
     console.log(TAG,`TabId ${tabId}: sent: `,request);  
+    let payload = getTabListInstance()[tabId];  // gets parameters assigned to this tab id
     if(request==='ready'){
         //sends params to content script
-        let payload = JSON.stringify(getTabListInstance()[tabId]);  // gets parameters assigned to this tab id
+        payload = JSON.stringify(payload);
         sendMessageContentScript(tabId,payload);    // sends the encoded param to content script in the tab
         console.log(TAG,'Sent message to content script at ',tabId,sender.tab.url,payload);
         return;
     }
+    request = JSON.parse(request);
     let tabList = getTabListInstance();
-    if(!isMessageMatchFormat(request) || tabList[tabId]==undefined)
+    // console.log(TAG,'xhr condition: ',!isMessageMatchFormat(request),tabList[tabId]==undefined);  // debuggin
+    if(!isMessageMatchFormat(request) || tabList[tabId]==undefined) // checks if message invalid or this tab is not tracked
         return;  // ensures sender's message contains our data
-    let payload = generatePayload(request); // creates payload for calling GAS API
-    console.log(TAG,`Tab #${tabId}: generated payload: `,payload);
-    xhrWithAuth(payload);
+    chrome.tabs.remove(tabId);  // closes the tab sending data.
+    let args = {    // TODO: inspect args to see why we are not calling the right API
+        ...request,
+        timeout:payload.params.timeout //! gets timeout param from payload assigned to this tab id
+    }
+    let xhrPayload = generatePayload(args,request.type); // creates payload for calling GAS API
+    console.log(TAG,`Tab #${tabId}: generated payload: `,xhrPayload);
+    xhrWithAuth(xhrPayload);
 }
 /**
  * Handles messages from popup.html
@@ -185,7 +207,11 @@ function onPopupMessageListener(request,sender,sendResponse){
         });
     } else if(request=='test'){
         console.log('Test started.');
-        xhrWithAuth({row:5,val:'Hello from extension'});  // TODO: change params
+        xhrWithAuth(generatePayload({
+            val:'hello!',
+            row:6,
+            timeout:60*1000
+        },'comment'));  // TODO: change params
     } 
     else{
         console.log("Request wrong format: "+request);
