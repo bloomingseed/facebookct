@@ -1,5 +1,6 @@
 # How to run
 [ ] **Install the extension**. Go to `chrome://extensions`, enable "Developer Mode" if you haven't, then drag the extension folder onto the webpage to install it.
+[ ] **Initialize**. Click the extension and press "Authenticate" to initialize the tool.
 [ ] **Request access**. Request access for authenticating into the extension and the spreadsheet. Go to the spreadsheet at "https://docs.google.com/spreadsheets/d/1oHExaxzet-1_2Jm3_vi1tasZjLQLl1dVozOnlb-BEmI/edit#gid=0" and request for access, then I can grant you the needed permissions.
 [ ] **Use the tool**. Accept apps script's scopes when first run the tool. After that try running your command again since it would be discarded.
 
@@ -17,3 +18,4 @@
 - User **must** focus on other window before the tool make comment. Otherwise it won't work.
 - Spreadsheet column orders must not be changed.
 - Google puts many constraints: daily token limit of 10000, test users of 100. Publishing app requires verification.
+- Can only have 20 schedules. After that clearing all triggers is needed.
