@@ -1,6 +1,6 @@
 # How to run
 [ ] **Install the extension**. Go to `chrome://extensions`, enable "Developer Mode" if you haven't, then drag the extension folder onto the webpage to install it.
-[ ] **Request access**. Request access for authenticating into the extension and the spreadsheet. Go to the spreadsheet at "https://docs.google.com/spreadsheets/d/1FVOJCeA4lmADL2pk1ttGg4GEbn_4QPfbeF6_bCviAY8/edit#gid=0" and request for access, then I can grant you the needed permissions.
+[ ] **Request access**. Request access for authenticating into the extension and the spreadsheet. Go to the spreadsheet at "https://docs.google.com/spreadsheets/d/1R3jimjh9BJ9uuxTiq1tDLRfWx7_3l7JPz61vmhQv9iE/edit" and request for access, then I can grant you the needed permissions.
 [ ] **Use the tool**. Accept apps script's scopes when first run the tool. After that try running your command again since it would be discarded.
 
 # Basic usage flow
@@ -11,7 +11,7 @@
 - **Press the "Start" button** to actually begin the automation.
 
 # How to use the contained spreadsheet
-- This spreadsheet at "https://docs.google.com/spreadsheets/d/1FVOJCeA4lmADL2pk1ttGg4GEbn_4QPfbeF6_bCviAY8/edit#gid=0" is where you type the youtube URL, timeout and comment to execute. It also keeps your comment URL. 
+- This spreadsheet at "https://docs.google.com/spreadsheets/d/1R3jimjh9BJ9uuxTiq1tDLRfWx7_3l7JPz61vmhQv9iE/edit" is where you type the youtube URL, timeout and comment to execute. It also keeps your comment URL. 
 - The "comments" column can be randomized from a comment box which is on the far right of the spreadsheet, using excel formula. If you need more comments, add rows under the "comment box" then change range in the formula.
 
 # Current drawbacks
