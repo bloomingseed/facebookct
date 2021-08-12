@@ -19,7 +19,7 @@ function isFacebookUrlMatchFormat(url,output){
             o[key] = q.get(key);
     }
     output['params'] = o;
-    output['type'] = o['comment_id'] && o['facebookct']?'delete'
+    output['type'] = o['comment_id'] && o['row'] && o['facebookct']?'delete'
                     :o['comment'] && o['row']?'comment'
                     :null;
     return true;
@@ -121,7 +121,7 @@ function xhrWithAuth(payload) {
     var retry = true;
     // const API_KEY = 'AIzaSyBoOa9ile3fk8_dEo4DRMEzD2g4uRdvLI8';
     // const SCRIPT_ID = 'AKfycbxdp2tFOBq2XcKm_oZdj-oUbnn_SozhRwJeDE6mkgmjFtjevJ49iqoEVFVsmGhS7Pi4';
-    const DEPLOYMENT_ID = 'AKfycbxQvvXJe8LMoSUSW6lsHCeRN4SEA5ENBNjW8-lpimZDTYlZ-8VdE_EDvNHr_h4Hds2vsA';
+    const DEPLOYMENT_ID = 'AKfycbyUUTYXq1cmIopb3N0QG-mZAXnRxtm0guXJuJHmtBCTBhT7KE_lZjVVRuTE5GsJdFvEPw';
     const POST_URL = `https://script.googleapis.com/v1/scripts/${DEPLOYMENT_ID}:run`;
     
     

@@ -34,7 +34,7 @@ function getDocumentHeight(){
  */
 function getCommentElements(){
     let ulists = document.querySelectorAll('div[data-visualcompletion="ignore-dynamic"] ul');
-    console.log('ulists:',ulists, ulists.length==1);  // debugging
+    // console.log('ulists:',ulists, ulists.length==1);  // debugging
     if(ulists.length==1)    // checks if there are no other comments
         return [];
     return ulists[0].children;  // returns list of comment options elements (for: like, url,..)
@@ -109,20 +109,122 @@ function openStubWindow(){
     return stubWindow;
 }
 /**
+ * Gets the option button of the last comment.
+ * Returns the last options button, or null if it doesn't exists (not loaded).
+ */
+function getOptionsButton(){
+    let btns = document.querySelectorAll('div[aria-label="Edit or delete this"]:last-child');   // get the options buttons of all comments
+    return btns.length>0?btns[btns.length-1]:null;     // returns last options button
+}
+/**
+ * Gets the div container for the edit or delete container that pops up when click on an options button.
+ * This container will be empty if no edit or delete container is active, i.e. no options button clicked.
+ */
+function getEditOrDeleteContainer(cb){
+    return document.querySelector('div[id^="mount"] > div > div:nth-child(1) > div > div.rq0escxv.l9j0dhe7.du4w35lb > div > div > div:nth-child(2) > div');
+}
+/**
+ * Gets the popup element's container, e.g: the popup warning to confirm delete.
+ * Returns the div container for popup elements.
+ */
+function getPopupContainer(){
+    return document.querySelector('div[id^="mount"] > div > div:nth-child(1) > div > div:nth-child(7) > div');
+}
+/**
+ * Observes changes in DOM tree with subtree observating being false by default.
+ * Returns the observer.
+ */
+function observeDomMutation(target, cb,subtree=false){
+    let config = {childList:true, subtree};
+    let observer = new MutationObserver(cb);
+    observer.observe(target,config);
+    return observer;
+}
+/**
+ * Entry function to delete the last comment on the comment page.
+ */
+function deleteComment(cb){
+    const TAG = 'deleteComment';
+    let interval = 1000; // sets a small interval
+    console.log(TAG,'Started');
+    let t = setInterval(function(){
+        console.log(TAG,'checking webpage loaded..');
+        let optionsBtn = getOptionsButton();
+        let eodContainer = getEditOrDeleteContainer();
+        let popupContainer = getPopupContainer();
+        if(!(optionsBtn && eodContainer && popupContainer)) // checks if the options button is not ready yet
+            return; 
+        clearInterval(t);   // stops checking the options button
+        console.log(TAG,'deleting comment..');
+        console.log(eodContainer,popupContainer);   //debugging
+        let eodObserver = observeDomMutation(eodContainer,mutations=>{    // observes DOM changes in edit or delete container
+            console.log('eodContainer mutated',mutations);  // debugging
+            let tClickDelBtn = setInterval(()=>{
+                let delBtn = eodContainer.querySelector('div[role="menuitem"]:last-child');    // gets the delete button
+                if(!delBtn){ // checks if delete button has not loaded
+                    return;
+                }
+                clearInterval(tClickDelBtn);
+                delBtn.click(); // clicks the delete button
+            },interval);
+        })
+        let popupObserver = observeDomMutation(popupContainer,mutations=>{  // observes DOM changes in popup container
+            console.log('popupContainer mutated',mutations);  // debugging
+            let tClickConfirmBtn = setInterval(()=>{
+                let confirmBtn = popupContainer.querySelector('div[aria-label="Delete"]');    // gets the delete button in the popup element
+                if(!confirmBtn){    // checks if confirm button has not loaded
+                    return;
+                }
+                clearInterval(tClickConfirmBtn);
+                confirmBtn.click(); // deletes comment
+            },interval);
+        })
+        let cmtsCount = getCommentElements().length;    // gets current comments count
+        optionsBtn.click(); // clicks the options to makes eod pops up
+        let tCountComments = setInterval(()=>{  // does intervally
+            let cmtElms = getCommentElements();
+            console.log(cmtElms.length, cmtsCount, cmtElms.length>=cmtsCount);   // debugging
+            if(cmtElms.length>=cmtsCount){  // checks if comments count has not changed
+                return;
+            }
+            clearInterval(tCountComments);
+            eodObserver.disconnect();   // stops observing (thread safe)
+            popupObserver.disconnect();
+            console.log(globalThis.locked); // debugging
+            if(globalThis.locked==undefined){   // checks if this is first call after deletion detected
+                console.log(TAG,'calling callback');
+                globalThis.locked = true;   // sets the asycn lock
+                cb();   // executes the callback
+            } else{ // checks if the lock has been set
+                return;
+            }
+        },interval);
+        
+    },interval);
+}
+/**
  * Main procedure after received arguments
  */
 function main(args){
     const TAG = 'main';
     let type = args.type;
-    let stubWindow = openStubWindow();  // opens stub window to redirect the focus
     if(type=='comment'){   // checks if the args is for making comment
+        let stubWindow = openStubWindow();  // opens stub window to redirect the focus
         let {comment, row} = args.params;   // extracts comment and row value from arguments
         makeComment(comment, function(val){
             let msgPayload = JSON.stringify({row,val,type}); // creates correct format object to send to the extension
-            sendMessageExtension(msgPayload, stubWindow.close); // sends message to extension
+            sendMessageExtension(msgPayload, stubWindow.close);
+            setInterval(function(){sendMessageExtension(msgPayload, stubWindow.close)}, 30*1000) // sends message to extension every 30s
         });
     } else{ // checks if the args is for deleting comment
-        // TODO
+        let {row} = args.params;    // extracts the row value from received params
+        deleteComment(()=>{
+            let val = 'comment deleted';    // sets the value of the status to send
+            let msgPayload = JSON.stringify({row,val,type});
+            console.log(TAG,msgPayload);
+            sendMessageExtension(msgPayload);
+            setInterval(function(){sendMessageExtension(msgPayload)}, 30*1000) // sends message to extension every 30s
+        })
     }
 }
 
