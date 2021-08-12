@@ -11,7 +11,7 @@ function isFacebookUrlMatchFormat(url,output){
     let urlParams = matches[2];
     let q = new URLSearchParams(urlParams);
     let paramKeys = [   // possible params
-                        'comment','row', 'timeout',    // params to make comment
+                        'comment','row',    // params to make comment
                         'comment_id','facebookct'];      // param to delete comment 
     let o = {}
     for(let key of paramKeys){
@@ -81,23 +81,23 @@ function isMessageMatchFormat(request){
  * Different types of request resulting in different payload!
  */
 function generatePayload(args,type){
-    let funcName, params;
-    if(type=='comment' && args.timeout){
-        funcName = 'scheduleDeleteComment';
-        params = [args.val, args.timeout, args.row];
-    } else {
-        funcName = 'setStatusValue';
-        params = [args.row, args.val];
-    }
-    // const FUNC_NAME = 'setStatusValue'; // defines GAS method name to call
-    // return JSON.stringify({
-    //     "function": FUNC_NAME,
-    //     "parameters": [args.row, args.val]  // defines the arguments for the GAS method
-    // });
+    // let funcName, params;
+    // if(type=='comment' && args.timeout){
+    //     funcName = 'scheduleDeleteComment';
+    //     params = [args.val, args.timeout, args.row];
+    // } else {
+    //     funcName = 'setStatusValue';
+    //     params = [args.row, args.val];
+    // }
+    const FUNC_NAME = 'setStatusValue'; // defines GAS method name to call
     return JSON.stringify({
-        'function':funcName,
-        'parameters':params
+        "function": FUNC_NAME,
+        "parameters": [args.row, args.val]  // defines the arguments for the GAS method
     });
+    // return JSON.stringify({
+    //     'function':funcName,
+    //     'parameters':params
+    // });
 }
 function getTokenStorage(callback){
     const KEY = 'token';    // the key used to save the token
@@ -121,7 +121,7 @@ function xhrWithAuth(payload) {
     var retry = true;
     // const API_KEY = 'AIzaSyBoOa9ile3fk8_dEo4DRMEzD2g4uRdvLI8';
     // const SCRIPT_ID = 'AKfycbxdp2tFOBq2XcKm_oZdj-oUbnn_SozhRwJeDE6mkgmjFtjevJ49iqoEVFVsmGhS7Pi4';
-    const DEPLOYMENT_ID = 'AKfycbyUUTYXq1cmIopb3N0QG-mZAXnRxtm0guXJuJHmtBCTBhT7KE_lZjVVRuTE5GsJdFvEPw';
+    const DEPLOYMENT_ID = 'AKfycbx3X4h636yVbYUDYu7EHcb5KBwCpNVqwdlblAPDR5pKbOj2T3FmVrFSdAzyyj9KMiBrSA';
     const POST_URL = `https://script.googleapis.com/v1/scripts/${DEPLOYMENT_ID}:run`;
     
     
@@ -181,14 +181,14 @@ function onTabMessageListener(request, sender, sendResponse){
     request = JSON.parse(request);
     let tabList = getTabListInstance();
     // console.log(TAG,'xhr condition: ',!isMessageMatchFormat(request),tabList[tabId]==undefined);  // debuggin
-    if(!isMessageMatchFormat(request) || tabList[tabId]==undefined) // checks if message invalid or this tab is not tracked
-        return;  // ensures sender's message contains our data
+    // if(!isMessageMatchFormat(request) || tabList[tabId]==undefined) // checks if message invalid or this tab is not tracked
+    //     return;  // ensures sender's message contains our data
     chrome.tabs.remove(tabId);  // closes the tab sending data.
-    let args = {    // TODO: inspect args to see why we are not calling the right API
-        ...request,
-        timeout:payload.params.timeout //! gets timeout param from payload assigned to this tab id
-    }
-    let xhrPayload = generatePayload(args,request.type); // creates payload for calling GAS API
+    // let args = {    // TODO: inspect args to see why we are not calling the right API
+    //     ...request,
+    //     timeout:payload.params.timeout //! gets timeout param from payload assigned to this tab id
+    // }
+    let xhrPayload = generatePayload(request,request.type); // creates payload for calling GAS API
     console.log(TAG,`Tab #${tabId}: generated payload: `,xhrPayload);
     xhrWithAuth(xhrPayload);
 }

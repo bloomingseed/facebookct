@@ -219,7 +219,8 @@ function main(args){
     } else{ // checks if the args is for deleting comment
         let {row} = args.params;    // extracts the row value from received params
         deleteComment(()=>{
-            let val = 'comment deleted';    // sets the value of the status to send
+            // let val = 'comment deleted';    // sets the value of the status to send
+            let val = '';    // sets the value of the status to send
             let msgPayload = JSON.stringify({row,val,type});
             console.log(TAG,msgPayload);
             sendMessageExtension(msgPayload);

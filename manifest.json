@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "name": "Facebook Commentor Tool",
     "description": "A tool to auto post comment to facebook posts and update the spreadsheet status. This extension works together with the designed Google app script.",
-    "version": "1.0.0",
+    "version": "1.2.0",
     "background":{
         "service_worker": "background-wrapper.js"
     },
