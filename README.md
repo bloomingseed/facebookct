@@ -24,4 +24,4 @@
 - If your comment has several paragraphs, ends each paragraph with a new line character '\n' like this: `My comment goes here.\nSend me some emails!`.
 
 # [2] Append to current sheet
-- This means the Google Sheets will append all data from the cell at (last row + 1, A) to (last row + input's rows, 'A'+input row's columns count). **So basically, all previous data is safe.**
+- This means the Google Sheets will append all data from the cell at (last row + 1, A) to (last row + input's rows, 'A'+input row's columns count). **So basically, all previous data is safe.****stupid edition**
